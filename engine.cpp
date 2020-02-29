@@ -16,7 +16,7 @@ AVFrame *per_frame;
 #define URL "rtmp://120.77.214.213:1935/live_video/video"
 #define OUT "helloworld.flv"
 #define JPG "hello.jpg"
-#define VERSION 1.01
+#define VERSION 4.01
 #define FLAG 1
 #define RTMP 1/*always do it not*/
 
