@@ -226,7 +226,7 @@ void test_ffmpeg_rtmp_client()
 			printf("The video size totally is %d kb\n",video_size_all/100000);
 
 			/*pkt->size should not be zero, if it is, it should be break*/
-			if (ret < 0 && !(pkt->size))
+			if (ret < 0)/*pkt->size would never be zero*/
 			{
 				printf("avcodec_decode_video2 error\n");
 				return;
