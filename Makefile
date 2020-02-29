@@ -15,4 +15,4 @@ LDFLAGS = -I /usr/local/ffmpeg/include \
 all:
 	g++ -std=c++11 pull.cpp face.cpp -o test $(LDFLAGS) $(CFLAGS)	
 clean:
-	rm test
+	rm test ArcFace64.dat

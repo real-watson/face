@@ -18,6 +18,7 @@ FILE *video = NULL;
 
 #define URL "rtmp://120.77.214.213:1935/live_video/video"
 #define OUT "helloworld.yuv"
+
 extern int face_feature_detection(char *imgfile,char *face_mesg);
 
 static void init_register_network()
@@ -86,12 +87,10 @@ static int test_ffmpeg_rtmp_client()
 		return -1;
 	}
 
-	//获取视频流中的编解码上下文
-	pCodecCtx = format_ctx->streams[video_stream_index]->codec;
-	//获取音频流中的编解码上下文
 	
-	//根据编解码上下文中的编码id查找对应的解码
-	pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
+	pCodecCtx = format_ctx->streams[video_stream_index]->codec;/*Get codec from video index*/
+	
+	pCodec = avcodec_find_decoder(pCodecCtx->codec_id);/*Find decoder for specific codec*/
 	if (NULL == pCodec)
 	{
 		printf("could not find decoder......\n");
@@ -104,9 +103,9 @@ static int test_ffmpeg_rtmp_client()
 		return -1;
 	}
 
+	/*set pix of image about RGB24*/
 	uint8_t *out_buffer = (uint8_t *)av_malloc(avpicture_get_size(AV_PIX_FMT_RGB24, pCodecCtx->width, pCodecCtx->height));
 	avpicture_fill((AVPicture *)pFrameYUV, out_buffer, AV_PIX_FMT_RGB24, pCodecCtx->width, pCodecCtx->height);
-	//用于转码（缩放）的参数，转之前的宽高，转之后的宽高，格式等
 	struct SwsContext *sws_ctx = sws_getContext(pCodecCtx->width,pCodecCtx->height,pCodecCtx->pix_fmt,pCodecCtx->width, pCodecCtx->height, AV_PIX_FMT_RGB24,SWS_BICUBIC, NULL, NULL, NULL);
 
 
@@ -124,14 +123,14 @@ static int test_ffmpeg_rtmp_client()
 		{
 			printf("video_stream_index......\n");
 			fprintf(stdout, "video stream, packet size: %d\n", pkt.size);
-			//解码video		
-			ret = avcodec_decode_video2(pCodecCtx,pFrame,&got_picture,&pkt);
+			ret = avcodec_decode_video2(pCodecCtx,pFrame,&got_picture,&pkt);/*decoded packet to frame via pCodecCtx*/
 			if (ret < 0)
 			{
 				printf("decoder error......\n");
 				return -1;
 			}
 			//If the frame is not zero, it should be return got_picture.
+			printf("The got picture is %d\n",got_picture);
 		 	if (got_picture)
 			{
 				sws_scale(sws_ctx, pFrame->data, pFrame->linesize, 0, pCodecCtx->height,pFrameYUV->data, pFrameYUV->linesize);
@@ -141,6 +140,7 @@ static int test_ffmpeg_rtmp_client()
 				//save image for only one picture
 				if (frame_output == 1)
 				{
+					/*write to file*/
 					fwrite(pFrameYUV->data[0],(pCodecCtx->width)*(pCodecCtx->height)*3,1,video); 
 				}
 			}
