@@ -13,6 +13,6 @@ LDFLAGS = -I /usr/local/ffmpeg/include \
 	-larcsoft_face_engine 
 
 all:
-	g++ -std=c++11 pull.cpp face.cpp -o test $(LDFLAGS) $(CFLAGS)	
+	g++ -std=c++11 engine.cpp face.cpp -o test $(LDFLAGS) $(CFLAGS)	
 clean:
-	rm test ArcFace64.dat
+	rm test
