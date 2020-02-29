@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 using namespace std;
 
@@ -63,7 +64,7 @@ int ColorSpaceConversion(MInt32 width, MInt32 height, MInt32 format, MUInt8* img
 
 /*from which image to get which feature of persion*/
 
-int face_feature_detection(char *imgfile, char *face_mesg)
+int face_feature_detection(const char *imgfile, char *face_mesg)
 {
 	MRESULT res = MOK;
 	MHandle handle = NULL;
@@ -78,6 +79,8 @@ int face_feature_detection(char *imgfile, char *face_mesg)
 	MInt32 processMask;
 	int age;
 	char gender[8] = "";
+
+	assert(imgfile);
 
 	res = ASFOnlineActivation(appid,sdkkey);
 	if (MOK != res && MERR_ASF_ALREADY_ACTIVATED != res)
