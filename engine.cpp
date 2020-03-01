@@ -1,10 +1,4 @@
-extern "C" 
-{
-	#include <libavformat/avformat.h>
-	#include <libswscale/swscale.h> 
-	#include <libavcodec/avcodec.h>
-	#include <libswresample/swresample.h>
-}
+#include "engine.h"
 
 AVFormatContext *in_format_ctx;
 AVPacket *pkt;
@@ -13,32 +7,6 @@ AVCodecContext *pCodecCtx;
 AVCodec *pCodec;
 AVFrame *per_frame;
 AVFrame *frame;
-
-
-#define URL "rtmp://120.77.214.213:1935/live_video/video"
-#define OUT "helloworld.flv"
-#define JPG "hello.jpg"
-#define VERSION 4.01
-#define FLAG 1
-#define RTMP 1/*always do it not*/
-#define FACE 0
-extern void face_feature_detection(const char *filename, char *mesg);
-
-void save_jpg(AVFrame *jpgframe, int num, int width, int height)
-{
-	FILE *file;
-	char filename[32] = "";
-	int y;
-
-	sprintf(filename,"%d.jpg",num);
-	file = fopen(filename,"wb");
-	if (!file)
-		return;
-	fprintf(file,"P6\n%d %d\n255\n", width, height);
-	for ( y=0; y<height; y++ )
-	fwrite(jpgframe->data[0] + y * jpgframe->linesize[0], 1, width * 3, file);
-	fclose(file);
-}
 
 
 void init_register_network()
@@ -181,11 +149,6 @@ void test_ffmpeg_rtmp_client()
 
 	/*init jpg setting*/
 	frame = av_frame_alloc(); 
-	per_frame = av_frame_alloc(); 
-	numbytes = avpicture_get_size(AV_PIX_FMT_RGB24,pCodecCtx->width,pCodecCtx->height);
-	buffer =(uint8_t *)av_malloc(numbytes);
-	avpicture_fill((AVPicture*)per_frame,buffer,AV_PIX_FMT_RGB24,pCodecCtx->width,pCodecCtx->height);
-	img_convert_ctx = sws_getCachedContext(img_convert_ctx,pCodecCtx->width,pCodecCtx->height,pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height, AV_PIX_FMT_RGB24, SWS_BICUBIC, NULL, NULL, NULL);
 
 	while (1) 
 	{
@@ -271,9 +234,8 @@ void test_ffmpeg_rtmp_client()
 			avcodec_decode_video2(pCodecCtx,frame,&got_picture,pkt);
 			if (got_picture)
 			{
-				sws_scale(img_convert_ctx, (const uint8_t* const*)frame, frame->linesize, 0, pCodecCtx->height,per_frame->data, per_frame->linesize); 
 				if (++j == 1)
-					save_jpg(per_frame,j,pCodecCtx->width, pCodecCtx->height);
+					save_jpeg(frame,"watson.jpg",pCodecCtx->width,pCodecCtx->height);
 			}
 
 		}
