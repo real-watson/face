@@ -55,7 +55,7 @@ int save_jpeg(AVFrame *pFrame,char *outfile, int width, int height)
     if (ret < 0) 
         return -1;
 
-    if (got_picture == 1) 
+    if (got_picture)/*return 1 means one pkt comes*/
         ret = av_write_frame(pFormatCtx, &pkt);/*write frame in file*/
     
 

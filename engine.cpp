@@ -232,7 +232,7 @@ void test_ffmpeg_rtmp_client()
 			/*If one picture comes it should be storage.*/
 			/*decode each frame*/
 			avcodec_decode_video2(pCodecCtx,frame,&got_picture,pkt);
-			if (got_picture)
+			if (got_picture && pkt->size != 0)
 			{
 				if (++j == 1)
 					save_jpeg(frame,"watson.jpg",pCodecCtx->width,pCodecCtx->height);
