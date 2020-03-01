@@ -21,6 +21,7 @@ AVFrame *frame;
 #define VERSION 4.01
 #define FLAG 1
 #define RTMP 1/*always do it not*/
+#define FACE 0
 extern void face_feature_detection(const char *filename, char *mesg);
 
 void save_jpg(AVFrame *jpgframe, int num, int width, int height)
@@ -299,11 +300,13 @@ void test_ffmpeg_rtmp_client()
 int main(int argc, char **argv)
 {
 	
-//	test_ffmpeg_rtmp_client();
+#if FACE
 	char imgfile[32] = "640x480.NV21";
 	char face_mesg[32] = "";
 	face_feature_detection(imgfile,face_mesg);
 	printf("The face_mesg is %s\n",face_mesg);
-
+#else
+	test_ffmpeg_rtmp_client();
+#endif
 	return 0;
 }
