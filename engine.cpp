@@ -12,6 +12,8 @@ AVStream *stream;
 AVCodecContext *pCodecCtx;
 AVCodec *pCodec;
 AVFrame *per_frame;
+AVFrame *frame;
+
 
 #define URL "rtmp://120.77.214.213:1935/live_video/video"
 #define OUT "helloworld.flv"
@@ -19,6 +21,24 @@ AVFrame *per_frame;
 #define VERSION 4.01
 #define FLAG 1
 #define RTMP 1/*always do it not*/
+extern void face_feature_detection(const char *filename, char *mesg);
+
+void save_jpg(AVFrame *jpgframe, int num, int width, int height)
+{
+	FILE *file;
+	char filename[32] = "";
+	int y;
+
+	sprintf(filename,"%d.jpg",num);
+	file = fopen(filename,"wb");
+	if (!file)
+		return;
+	fprintf(file,"P6\n%d %d\n255\n", width, height);
+	for ( y=0; y<height; y++ )
+	fwrite(jpgframe->data[0] + y * jpgframe->linesize[0], 1, width * 3, file);
+	fclose(file);
+}
+
 
 void init_register_network()
 {
@@ -41,6 +61,12 @@ void test_ffmpeg_rtmp_client()
 	char filename[32] = "";
 	int audio_size_all = 0;
 	int video_size_all = 0;
+
+	uint8_t *buffer;
+	int numbytes;
+	int got_picture;
+	struct SwsContext *img_convert_ctx = NULL;
+	int j = 0;
 
 	//init register and network
 	init_register_network();
@@ -152,6 +178,14 @@ void test_ffmpeg_rtmp_client()
 	pkt = av_packet_alloc();
 	av_dump_format(in_format_ctx,0,OUT,0);
 
+	/*init jpg setting*/
+	frame = av_frame_alloc(); 
+	per_frame = av_frame_alloc(); 
+	numbytes = avpicture_get_size(AV_PIX_FMT_RGB24,pCodecCtx->width,pCodecCtx->height);
+	buffer =(uint8_t *)av_malloc(numbytes);
+	avpicture_fill((AVPicture*)per_frame,buffer,AV_PIX_FMT_RGB24,pCodecCtx->width,pCodecCtx->height);
+	img_convert_ctx = sws_getCachedContext(img_convert_ctx,pCodecCtx->width,pCodecCtx->height,pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height, AV_PIX_FMT_RGB24, SWS_BICUBIC, NULL, NULL, NULL);
+
 	while (1) 
 	{
 		//read each frame
@@ -232,6 +266,14 @@ void test_ffmpeg_rtmp_client()
 				return;
 			}
 			/*If one picture comes it should be storage.*/
+			/*decode each frame*/
+			avcodec_decode_video2(pCodecCtx,frame,&got_picture,pkt);
+			if (got_picture)
+			{
+				sws_scale(img_convert_ctx, (const uint8_t* const*)frame, frame->linesize, 0, pCodecCtx->height,per_frame->data, per_frame->linesize); 
+				if (++j == 1)
+					save_jpg(per_frame,j,pCodecCtx->width, pCodecCtx->height);
+			}
 
 		}
  
@@ -257,13 +299,11 @@ void test_ffmpeg_rtmp_client()
 int main(int argc, char **argv)
 {
 	
-	test_ffmpeg_rtmp_client();
-/*
-	char imgfile[32] = "640x480_2.NV21";
+//	test_ffmpeg_rtmp_client();
+	char imgfile[32] = "640x480.NV21";
 	char face_mesg[32] = "";
 	face_feature_detection(imgfile,face_mesg);
 	printf("The face_mesg is %s\n",face_mesg);
-*/
 
 	return 0;
 }
