@@ -12,7 +12,7 @@ extern "C"
 #define URL "rtmp://120.77.214.213:1935/live_video/video"
 #define OUT "helloworld.flv"
 #define JPG "hello.jpg"
-#define VERSION 6.01
+#define VERSION 7.01
 #define FLAG 1
 #define RTMP 1/*always do it not*/
 #define FACE 0
