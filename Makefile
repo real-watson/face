@@ -12,7 +12,10 @@ LDFLAGS = -I /usr/local/ffmpeg/include \
 	-larcsoft_face \
 	-larcsoft_face_engine 
 
+CPP = -std=c++11
+SRC = engine.cpp face.cpp jpeg.cpp
+
 all:
-	g++ -std=c++11 engine.cpp face.cpp jpeg.cpp -o test $(LDFLAGS) $(CFLAGS)	
+	g++ $(CPP) $(SRC) -o test $(LDFLAGS) $(CFLAGS)	
 clean:
 	rm test
