@@ -300,7 +300,7 @@ void test_ffmpeg_rtmp_client()
 
 int main(int argc, char **argv)
 {
-	util_set_string("AGE","11112");
+	util_set_string("GENDER","male");
 #if FACE
 	char imgfile[32] = "640x480.NV21";
 	char face_mesg[32] = "";

@@ -7,26 +7,35 @@ extern "C"
 	#include <string.h>
 }
 
-int file_moving_pointer(FILE *file, char *tmp, char *token, char *string)
+int file_moving_pointer(char *tmpbuff, char *token, char *string)
 {
-	int fp_start = 0;
-	int fp_end   = 0;
-	int tmplen   = 0;
-	int tokenlen = 0; 
-	int offset   = 0;
-	int inlen = 0;
-	char empty[32] = "111111";
-	char buff[32] = "";
-	tmplen   = strlen(tmp);
-	tokenlen = strlen(token); 
-	inlen    = strlen(string);
-	
-	offset = -(tmplen - tokenlen - 1);
+	FILE *tmp = NULL;
+	FILE *file = NULL;
+	char buff[256] = "";
+	char new_value[256] = "";
+	int offset = 0;
+	tmp = fopen("config_tmp.txt","w");
+	file = fopen(CONFIG_PATH,"ab+");
 
-	//xxx=yyy only set yyy
-	fseek(file,offset,SEEK_CUR);
-	fread(buff,sizeof(char),tokenlen,file);
-	printf("The buff is %s\n",buff);
+	if (NULL == file || NULL == tmp)
+		return -1;
+
+	offset = strlen(tmpbuff) - strlen(token);//get the len of front string xxx=
+
+	while(fgets(buff,256,file) != NULL)//set up new file (tmp)
+	{
+		printf("The buff is %s\n",buff);
+		if (strncmp(buff,tmpbuff,strlen(tmpbuff)) == 0)
+			continue;
+		else
+			fwrite(buff,strlen(buff),sizeof(char),tmp);
+
+	}
+	strncpy(new_value,tmpbuff,offset);
+	strcat(new_value,string);
+	strcat(new_value,"\n");
+	fwrite(new_value,strlen(new_value),sizeof(char),tmp);
+
 	return 0;
 }
 
@@ -62,7 +71,7 @@ int util_token_back(FILE *file, char *buff, char *key, char *string, char *flag)
 				else if (strcmp(flag,"set") == 0)
 				{
 					//set string
-					file_moving_pointer(file,tmp,token,string);
+					file_moving_pointer(tmp,token,string);
 				}
 				else
 					return -1;
