@@ -19,9 +19,7 @@ int util_token_back(char *buff, char *key, char *string)
 		{
 			token = strtok(NULL,"=");
 			if (token != NULL)
-			{
 				strcpy(string,token);
-			}
 		}
 	}
 	return 0;
@@ -31,6 +29,8 @@ int util_get_string(char *key,char *string)
 {
 	char buff[256] = "";
 	FILE *file = NULL;
+	int res = 0;
+
 	file = fopen(CONFIG_PATH,"rw");
 	if (NULL == file)
 		return -1;
@@ -39,13 +39,12 @@ int util_get_string(char *key,char *string)
 	{
 		if (strstr(buff,key) != NULL)
 		{	
-			util_token_back(buff,key,string);	
+			res = util_token_back(buff,key,string);	
+			if (res != 0)
+				return -1;
 		}
 		else
-		{
 			continue;
-		}
-
 		memset(buff,0,256);
 	}
 	return 0;
