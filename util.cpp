@@ -7,9 +7,10 @@ extern "C"
 	#include <string.h>
 }
 
-int util_token_back(char *buff, char *key, char *string, int flag)
+int util_token_back(char *buff, char *key, char *string, char *flag)
 {
 	char *token = NULL;
+	int res = 0;
 	unsigned int len = 0;
 	token = strtok(buff,"=");
 	len = strlen(token);
@@ -20,27 +21,29 @@ int util_token_back(char *buff, char *key, char *string, int flag)
 			token = strtok(NULL,"=");
 			if (token != NULL)
 			{
-				if (flag == 1)
+				if (strcmp(flag,"get") == 0)
 				{
 					//get string
 					strcpy(string,token);
 				}
-				else if (flag == 0)
+				else if (strcmp(flag,"match") == 0)
 				{
 					//match string
 					return (strncmp(token,string,strlen(string)));
 				}
-				else//set string
+				else if (strcmp(flag,"set") == 0)
 				{
-
+					//set string
 				}
+				else
+					return -1;
 			}
 		}
 	}
 	return 0;
 }
 
-int util_get_string(char *key,char *string)
+int util_common_string(char *key, char *string, char *flag)
 {
 	char buff[256] = "";
 	FILE *file = NULL;
@@ -54,7 +57,7 @@ int util_get_string(char *key,char *string)
 	{
 		if (strstr(buff,key) != NULL)
 		{	
-			res = util_token_back(buff,key,string,1);	
+			res = util_token_back(buff,key,string,flag);	
 			if (res != 0)
 				return -1;
 		}
@@ -65,27 +68,20 @@ int util_get_string(char *key,char *string)
 	return 0;
 }
 
+int util_get_string(char *key, char *string)
+{
+	char flag[12] = "get";
+	return (util_common_string(key,string,flag));
+}
+
+int util_set_string(char *key, char *string)
+{
+	char flag[12] = "set";
+	return 0;
+}
+
 int util_match_string(char *key, char *string)
 {
-	char buff[256] = "";
-	FILE *file = NULL;
-	int res = 0;
-
-	file = fopen(CONFIG_PATH,"rw");
-	if (NULL == file)
-		return -1;
-	
-	while(fgets(buff,256,file) != NULL)
-	{
-		if (strstr(buff,key) != NULL)
-		{	
-			res = util_token_back(buff,key,string,0);	
-			if (res != 0)
-				return -1;
-		}
-		else
-			continue;
-		memset(buff,0,256);
-	}
-	return 0;
+	char flag[12] = "match";
+	return (util_common_string(key,string,flag));
 }
