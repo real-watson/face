@@ -7,7 +7,7 @@ extern "C"
 	#include <string.h>
 }
 
-int util_token_back(char *buff, char *key, char *string)
+int util_token_back(char *buff, char *key, char *string, int flag)
 {
 	char *token = NULL;
 	unsigned int len = 0;
@@ -19,7 +19,22 @@ int util_token_back(char *buff, char *key, char *string)
 		{
 			token = strtok(NULL,"=");
 			if (token != NULL)
-				strcpy(string,token);
+			{
+				if (flag == 1)
+				{
+					//get string
+					strcpy(string,token);
+				}
+				else if (flag == 0)
+				{
+					//match string
+					return (strncmp(token,string,strlen(string)));
+				}
+				else//set string
+				{
+
+				}
+			}
 		}
 	}
 	return 0;
@@ -39,7 +54,32 @@ int util_get_string(char *key,char *string)
 	{
 		if (strstr(buff,key) != NULL)
 		{	
-			res = util_token_back(buff,key,string);	
+			res = util_token_back(buff,key,string,1);	
+			if (res != 0)
+				return -1;
+		}
+		else
+			continue;
+		memset(buff,0,256);
+	}
+	return 0;
+}
+
+int util_match_string(char *key, char *string)
+{
+	char buff[256] = "";
+	FILE *file = NULL;
+	int res = 0;
+
+	file = fopen(CONFIG_PATH,"rw");
+	if (NULL == file)
+		return -1;
+	
+	while(fgets(buff,256,file) != NULL)
+	{
+		if (strstr(buff,key) != NULL)
+		{	
+			res = util_token_back(buff,key,string,0);	
 			if (res != 0)
 				return -1;
 		}
