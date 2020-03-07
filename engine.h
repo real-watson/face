@@ -18,14 +18,15 @@ extern "C"
 #define VERSION 7.01
 #define FLAG 1
 #define RTMP 1/*always do it not*/
-#define FACE 0
+#define FACE 1
 #define CONFIG_PATH "config.txt"
 #define MAX_AUDIO_FRAME_SIZE 92000
 
 extern void face_feature_detection(const char *filename, char *mesg);
 extern int save_jpeg(AVFrame *pFrame,char *outfile, int width, int height);
-extern int util_token_back(char *buff, char *key, char *string);
 extern int util_get_string(char *key,char *string);
+extern int util_match_string(char *key,char *string);
+extern int util_set_string(char *key,char *string);
 
 
 

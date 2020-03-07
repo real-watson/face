@@ -7,11 +7,39 @@ extern "C"
 	#include <string.h>
 }
 
-int util_token_back(char *buff, char *key, char *string, char *flag)
+int file_moving_pointer(FILE *file, char *tmp, char *token, char *string)
+{
+	int fp_start = 0;
+	int fp_end   = 0;
+	int tmplen   = 0;
+	int tokenlen = 0; 
+	int offset   = 0;
+	int inlen = 0;
+	char empty[32] = "111111";
+	char buff[32] = "";
+	tmplen   = strlen(tmp);
+	tokenlen = strlen(token); 
+	inlen    = strlen(string);
+	
+	offset = -(tmplen - tokenlen - 1);
+
+	//xxx=yyy only set yyy
+	fseek(file,offset,SEEK_CUR);
+	fread(buff,sizeof(char),tokenlen,file);
+	printf("The buff is %s\n",buff);
+	return 0;
+}
+
+int util_token_back(FILE *file, char *buff, char *key, char *string, char *flag)
 {
 	char *token = NULL;
 	int res = 0;
 	unsigned int len = 0;
+	char tmp[32] = "";
+	if (strcmp(flag,"set") == 0)
+	{
+		strncpy(tmp,buff,strlen(buff));
+	}
 	token = strtok(buff,"=");
 	len = strlen(token);
 	if (token != NULL)
@@ -34,6 +62,7 @@ int util_token_back(char *buff, char *key, char *string, char *flag)
 				else if (strcmp(flag,"set") == 0)
 				{
 					//set string
+					file_moving_pointer(file,tmp,token,string);
 				}
 				else
 					return -1;
@@ -49,7 +78,7 @@ int util_common_string(char *key, char *string, char *flag)
 	FILE *file = NULL;
 	int res = 0;
 
-	file = fopen(CONFIG_PATH,"rw");
+	file = fopen(CONFIG_PATH,"ab+");
 	if (NULL == file)
 		return -1;
 	
@@ -57,7 +86,7 @@ int util_common_string(char *key, char *string, char *flag)
 	{
 		if (strstr(buff,key) != NULL)
 		{	
-			res = util_token_back(buff,key,string,flag);	
+			res = util_token_back(file,buff,key,string,flag);	
 			if (res != 0)
 				return -1;
 		}
@@ -77,6 +106,7 @@ int util_get_string(char *key, char *string)
 int util_set_string(char *key, char *string)
 {
 	char flag[12] = "set";
+	return (util_common_string(key,string,flag));
 	return 0;
 }
 
