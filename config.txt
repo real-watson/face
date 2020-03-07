@@ -1,0 +1,3 @@
+NAME=watson
+AGE=22
+GENDER=female
