@@ -6,6 +6,9 @@ extern "C"
 	#include <libswscale/swscale.h> 
 	#include <libavcodec/avcodec.h>
 	#include <libswresample/swresample.h>
+
+	#include "libavutil/opt.h"
+	#include "libavutil/pixdesc.h"
 }
 
 
@@ -17,6 +20,7 @@ extern "C"
 #define RTMP 1/*always do it not*/
 #define FACE 0
 #define CONFIG_PATH "config.txt"
+#define MAX_AUDIO_FRAME_SIZE 92000
 
 extern void face_feature_detection(const char *filename, char *mesg);
 extern int save_jpeg(AVFrame *pFrame,char *outfile, int width, int height);

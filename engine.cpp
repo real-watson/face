@@ -4,10 +4,11 @@ AVFormatContext *in_format_ctx;
 AVPacket *pkt;
 AVStream *stream;
 AVCodecContext *pCodecCtx;
+AVCodecContext *paudioctx;
 AVCodec *pCodec;
+AVCodec *paudiocodec;
 AVFrame *per_frame;
 AVFrame *frame;
-
 
 void init_register_network()
 {
@@ -32,6 +33,7 @@ void test_ffmpeg_rtmp_client()
 	int video_size_all = 0;
 
 	uint8_t *buffer;
+	uint8_t *out_buffer;
 	int numbytes;
 	int got_picture;
 	struct SwsContext *img_convert_ctx = NULL;
@@ -120,7 +122,35 @@ void test_ffmpeg_rtmp_client()
 
 	/*Fetch the context from decoder and coder from video*/
 	pCodecCtx = in_format_ctx->streams[video_stream_index]->codec;
+
+	//audio context
+	paudioctx = in_format_ctx->streams[audio_stream_index]->codec;
 	
+	paudiocodec = avcodec_find_decoder(paudioctx->codec_id);
+	if (NULL == paudiocodec)
+		return;
+	//open audio codec
+	if (0 > avcodec_open2(paudioctx,paudiocodec,NULL))
+		return;
+	//init audio setting
+	int out_sample_rate = 44100;/*sampling rate*/
+	int out_nb_samples = paudioctx->frame_size;/*size*/
+	AVSampleFormat out_sample_fmt=AV_SAMPLE_FMT_S16;/*format for audio*/
+
+	uint64_t out_channel_layout = AV_CH_LAYOUT_STEREO;/*audio channel for output*/
+	int out_channels=av_get_channel_layout_nb_channels(out_channel_layout);
+	int out_buffer_size=av_samples_get_buffer_size(NULL,out_channels ,out_nb_samples,out_sample_fmt, 1);
+
+	out_buffer=(uint8_t *)av_malloc(MAX_AUDIO_FRAME_SIZE*2);/*for buffer*/
+	int64_t in_channel_layout=av_get_default_channel_layout(paudioctx->channels);/*channel for input*/
+	struct SwrContext *au_convert_ctx;
+	au_convert_ctx = swr_alloc();
+
+	//sampling and quatificating  and encoding signals
+	au_convert_ctx=swr_alloc_set_opts(au_convert_ctx,out_channel_layout, out_sample_fmt, out_sample_rate,in_channel_layout,paudioctx->sample_fmt , paudioctx->sample_rate,0, NULL);
+	swr_init(au_convert_ctx);
+
+
 	/*identity*/
 	pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
 	if (NULL == pCodec)
@@ -245,6 +275,15 @@ void test_ffmpeg_rtmp_client()
 			fprintf(stdout, "audio stream, packet size: %d\n", pkt->size);
 			audio_size_all += pkt->size;
 			printf("The audio size totally is %d kb\n",audio_size_all/100000);
+
+			//fetch from pkt
+			avcodec_decode_audio4(paudioctx,frame,&got_picture,pkt);
+			if (got_picture)
+			{
+				/*set out_buffer as output, binary data*/
+				swr_convert(au_convert_ctx,&out_buffer, MAX_AUDIO_FRAME_SIZE,(const uint8_t **)frame->data , frame->nb_samples);
+			}
+			//fwrite(out_buffer,sizeof(char),out_buffer_size,audio);
 		}
 
  
