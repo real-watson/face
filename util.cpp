@@ -124,20 +124,44 @@ int util_common_string(char *key, char *string, char *flag)
 	return 0;
 }
 
+int check_string(char *str)
+{
+	if (str == NULL)
+		return 0;
+	if (strstr(str,"=") != NULL)
+		return -1;
+	return 0;	
+}
+
 int util_get_string(char *key, char *string)
 {
+	int res = 0;
 	char flag[12] = "get";
-	return (util_common_string(key,string,flag));
+	res = check_string(string);
+	if (!res)
+		return (util_common_string(key,string,flag));
+	else
+		return -1;
 }
 
 int util_set_string(char *key, char *string)
 {
+	int res = 0;
 	char flag[12] = "set";
-	return (util_common_string(key,string,flag));
+	res = check_string(string);
+	if (!res)
+		return (util_common_string(key,string,flag));
+	else
+		return -1;
 }
 
 int util_match_string(char *key, char *string)
 {
+	int res = 0;
 	char flag[12] = "match";
-	return (util_common_string(key,string,flag));
+	res = check_string(string);
+	if (!res)
+		return (util_common_string(key,string,flag));
+	else
+		return -1;
 }
