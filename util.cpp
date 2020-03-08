@@ -7,6 +7,13 @@ extern "C"
 	#include <string.h>
 }
 
+void rename_config_file(char *tmp, char *file)
+{
+	char cmd[64] = ""; 
+	sprintf(cmd,"mv %s %s",tmp,file);
+	system(cmd);
+}
+
 int file_moving_pointer(char *tmpbuff, char *token, char *string)
 {
 	FILE *tmp = NULL;
@@ -14,7 +21,7 @@ int file_moving_pointer(char *tmpbuff, char *token, char *string)
 	char buff[256] = "";
 	char new_value[256] = "";
 	int offset = 0;
-	tmp = fopen("config_tmp.txt","w");
+	tmp = fopen(CONFIG_TMP,"w");
 	file = fopen(CONFIG_PATH,"ab+");
 
 	if (NULL == file || NULL == tmp)
@@ -35,6 +42,7 @@ int file_moving_pointer(char *tmpbuff, char *token, char *string)
 	strcat(new_value,string);
 	strcat(new_value,"\n");
 	fwrite(new_value,strlen(new_value),sizeof(char),tmp);
+	rename_config_file(CONFIG_TMP,CONFIG_PATH);
 	fclose(file);
 	fclose(tmp);
 	return 0;
