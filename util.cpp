@@ -35,11 +35,12 @@ int file_moving_pointer(char *tmpbuff, char *token, char *string)
 	strcat(new_value,string);
 	strcat(new_value,"\n");
 	fwrite(new_value,strlen(new_value),sizeof(char),tmp);
-
+	fclose(file);
+	fclose(tmp);
 	return 0;
 }
 
-int util_token_back(FILE *file, char *buff, char *key, char *string, char *flag)
+int util_token_back(char *buff, char *key, char *string, char *flag)
 {
 	char *token = NULL;
 	int res = 0;
@@ -95,7 +96,7 @@ int util_common_string(char *key, char *string, char *flag)
 	{
 		if (strstr(buff,key) != NULL)
 		{	
-			res = util_token_back(file,buff,key,string,flag);	
+			res = util_token_back(buff,key,string,flag);	
 			if (res != 0)
 				return -1;
 		}
@@ -103,6 +104,7 @@ int util_common_string(char *key, char *string, char *flag)
 			continue;
 		memset(buff,0,256);
 	}
+	fclose(file);
 	return 0;
 }
 
@@ -116,7 +118,6 @@ int util_set_string(char *key, char *string)
 {
 	char flag[12] = "set";
 	return (util_common_string(key,string,flag));
-	return 0;
 }
 
 int util_match_string(char *key, char *string)
