@@ -128,7 +128,7 @@ int check_string(char *str)
 {
 	if (str == NULL)
 		return 0;
-	if (strstr(str,"=") != NULL)
+	if (strstr(str,"=") != NULL || strstr(str," ") != NULL)//check the input
 		return -1;
 	return 0;	
 }
