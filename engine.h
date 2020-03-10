@@ -19,8 +19,8 @@ extern "C"
 #define FLAG 1
 #define RTMP 1/*always do it not*/
 #define FACE 1
-#define CONFIG_PATH "config.txt"
-#define CONFIG_TMP "config_tmp.txt"
+#define CONFIG_PATH "config.ini"
+#define CONFIG_TMP "config_tmp.ini"
 #define MAX_AUDIO_FRAME_SIZE 92000
 
 extern void face_feature_detection(const char *filename, char *mesg);
