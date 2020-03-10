@@ -103,6 +103,7 @@ int util_common_string(char *key, char *string, char *flag)
 	char buff[256] = "";
 	FILE *file = NULL;
 	int res = 0;
+	char last[128] = "";
 
 	file = fopen(CONFIG_PATH,"ab+");
 	if (NULL == file)
@@ -114,11 +115,31 @@ int util_common_string(char *key, char *string, char *flag)
 		{	
 			res = util_token_back(buff,key,string,flag);	
 			if (res != 0)
-				return -1;
+			{
+				res = -1;
+				break;
+			}
 		}
 		else
-			continue;
+		{
+			/*
+			* Set new key-value like ADDR "Earth"
+			* key=string
+			*/
+			sprintf(last,"%s=%s\n",key,string);
+			res = fwrite(last,strlen(last),sizeof(char),file);
+			if (res == 0)
+			{
+				res = -1;
+				break;
+			}
+		}
 		memset(buff,0,256);
+	}
+	if (res == -1)
+	{
+		fclose(file);
+		return res;
 	}
 	fclose(file);
 	return 0;
