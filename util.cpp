@@ -44,13 +44,11 @@ int file_moving_pointer(char *tmpbuff, char *token, char *string)
 			fwrite(buff,strlen(buff),sizeof(char),tmp);
 
 	}
-	/*
 	strncpy(new_value,tmpbuff,offset);
 	strcat(new_value,string);
 	strcat(new_value,"\n");
-	*/
 	/*Use sprintf commonly*/
-	sprintf(new_value,"%s=%s\n",tmpbuff,string);
+	//sprintf(new_value,"%s=%s\n",tmpbuff,string);
 	fwrite(new_value,strlen(new_value),sizeof(char),tmp);
 	res = rename_config_file(CONFIG_TMP,CONFIG_PATH);
 	if (-1 == res)
