@@ -37,18 +37,20 @@ int file_moving_pointer(char *tmpbuff, char *token, char *string)
 
 	while(fgets(buff,256,file) != NULL)//set up new file (tmp)
 	{
-		printf("The buff is %s\n",buff);
 		if (strncmp(buff,tmpbuff,strlen(tmpbuff)) == 0)
 			continue;
 		else
+		{
 			fwrite(buff,strlen(buff),sizeof(char),tmp);
+				
+		}
 
 	}
 	strncpy(new_value,tmpbuff,offset);
 	strcat(new_value,string);
 	strcat(new_value,"\n");
-	/*Use sprintf commonly*/
-	//sprintf(new_value,"%s=%s\n",tmpbuff,string);
+	/*Use sprintf commonly, but it is short of cutting string*/
+	//sprintf(new_value,"%s%s",tmpbuff,string);
 	fwrite(new_value,strlen(new_value),sizeof(char),tmp);
 	res = rename_config_file(CONFIG_TMP,CONFIG_PATH);
 	if (-1 == res)
@@ -90,6 +92,7 @@ int util_token_back(char *buff, char *key, char *string, char *flag)
 				else if (strcmp(flag,"set") == 0)
 				{
 					//set string
+					printf("set\n");
 					file_moving_pointer(tmp,token,string);
 				}
 				else
@@ -106,6 +109,7 @@ int util_common_string(char *key, char *string, char *flag)
 	FILE *file = NULL;
 	int res = 0;
 	char last[128] = "";
+	int sflag = 0;
 
 	file = fopen(CONFIG_PATH,"ab+");
 	if (NULL == file)
@@ -115,6 +119,7 @@ int util_common_string(char *key, char *string, char *flag)
 	{
 		if (strstr(buff,key) != NULL)
 		{	
+			sflag = 1;
 			res = util_token_back(buff,key,string,flag);	
 			if (res != 0)
 			{
@@ -124,20 +129,25 @@ int util_common_string(char *key, char *string, char *flag)
 		}
 		else
 		{
-			/*
-			* Set new key-value like ADDR "Earth"
-			* key=string
-			*/
-			sprintf(last,"%s=%s\n",key,string);
-			res = fwrite(last,strlen(last),sizeof(char),file);
-			if (res == 0)
-			{
-				res = -1;
-				break;
-			}
+			memset(buff,0,256);
+			continue;
 		}
-		memset(buff,0,256);
 	}
+
+	if (!sflag)// If the new key-value does not exsit, it shuold be zero.
+	{
+		/*
+		* Set new key-value like ADDR "Earth"
+		* key=string
+		*/
+		sprintf(last,"%s=%s\n",key,string);
+		res = fwrite(last,strlen(last),sizeof(char),file);
+		if (res == 0)
+		{
+			res = -1;
+		}
+	}
+
 	if (res == -1)
 	{
 		fclose(file);
